@@ -1,0 +1,36 @@
+[project]
+name = "kickstarter-service"
+version = "0.0.1"
+description = "ML Pro 1 sem"
+requires-python=">=3.11,<3.13"
+
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "pydantic-settings",
+    "pandas==2.3.3",
+    "scikit-learn==1.6.1",
+    "joblib",
+    "psycopg[binary]"
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "httpx",
+    "locust",
+    "ruff",
+    "matplotlib"
+]
+
+[build-system]
+requires = ["uv_build>=0.10,<0.11"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "kickstarter"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
