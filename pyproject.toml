@@ -1,6 +1,6 @@
 [project]
 name = "kickstarter-service"
-version = "0.0.1"
+version = "0.1.1"
 description = "ML Pro 1 sem"
 requires-python=">=3.11,<3.13"
 
@@ -34,3 +34,9 @@ module-name = "kickstarter"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.ruff]
+line-length = 150
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

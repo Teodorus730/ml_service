@@ -1,6 +1,7 @@
+import json
+
 import psycopg
 from psycopg.types.json import Json
-import json
 
 from kickstarter.config import settings
 

@@ -1,14 +1,12 @@
 import time
 import uuid
-
 from contextlib import asynccontextmanager
+from datetime import datetime
 
 import joblib
 import pandas as pd
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
-
 from pydantic import BaseModel, Field
-from datetime import datetime
 
 from kickstarter import db
 from kickstarter.config import settings
