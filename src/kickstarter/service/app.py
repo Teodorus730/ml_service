@@ -1,7 +1,6 @@
+import asyncio
 import time
 import uuid
-import json
-import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime
 
@@ -10,13 +9,10 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-
 from pydantic import BaseModel, Field
 
 from kickstarter import db
 from kickstarter.config import settings
-
-
 
 
 class Features(BaseModel):
