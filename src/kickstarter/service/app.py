@@ -1,15 +1,22 @@
 import time
 import uuid
+import json
+import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime
 
 import joblib
 import pandas as pd
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
 from pydantic import BaseModel, Field
 
 from kickstarter import db
 from kickstarter.config import settings
+
+
 
 
 class Features(BaseModel):
@@ -65,21 +72,16 @@ def ready():
 @app.post("/v1/predict")
 def predict(x: Features, request: Request) -> Prediction:
     t0 = time.perf_counter()
-    request_id = str(uuid.uuid4())
-    payload = x.model_dump()
     
-    for key, value in payload.items():
-        if value is None:
-            payload[key] = ""
+    request_id = request.state.request_id 
+    payload = x.model_dump()
             
     frame = pd.DataFrame([payload]).reindex(columns=app.state.meta["features"])
     score = float(app.state.pipeline.predict_proba(frame)[0, 1])
     latency_ms = round((time.perf_counter() - t0) * 1000, 2)
 
-    request.state.request_id = request_id
     request.state.log_payload = payload
     request.state.score = score
-    request.state.latency = latency_ms
 
     target = score >= app.state.meta["threshold"]
 
@@ -92,29 +94,61 @@ def predict(x: Features, request: Request) -> Prediction:
     )
     
 
-# Мидлваря ловит статус ответа и пишет в бд (хз мб неправильно понял задание)
 @app.middleware("http")
-async def log_predictions_middleware(request: Request, call_next):
+async def add_request_id_and_log_middleware(request: Request, call_next):
     if request.url.path != "/v1/predict" or request.method != "POST":
         return await call_next(request)
-    
-    response = await call_next(request)    
-    http_status = response.status_code
 
-    if hasattr(request.state, "log_payload"):
-        bg = BackgroundTasks()
-        bg.add_task(
-            db.save_prediction,
-            request.state.request_id,
-            request.state.log_payload,
-            request.state.score,
-            app.state.version,
-            request.state.latency,
-            http_status
+    request_id = str(uuid.uuid4())
+    request.state.request_id = request_id
+    t0 = time.perf_counter()
+
+    response = await call_next(request)
+
+    response.headers["X-Request-ID"] = request_id
+
+    if response.status_code == 200 and hasattr(request.state, "log_payload"):
+        latency_ms = round((time.perf_counter() - t0) * 1000, 2)
+        
+        asyncio.create_task(
+            asyncio.to_thread(
+                db.save_prediction,
+                request_id,
+                request.state.log_payload,
+                request.state.score,
+                app.state.version,
+                latency_ms,
+                200
+            )
         )
-        await bg()
 
     return response
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+    
+    if request.url.path == "/v1/predict" and request.method == "POST":
+        payload = exc.body if exc.body is not None else {}
 
+        asyncio.create_task(
+            asyncio.to_thread(
+                db.save_prediction,
+                request_id,
+                payload,
+                None,
+                getattr(app.state, "version", "unknown"),
+                None,
+                status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "request_id": request_id,
+            "detail": exc.errors()
+        },
+        headers={"X-Request-ID": request_id}
+    )
