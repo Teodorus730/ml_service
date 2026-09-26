@@ -18,6 +18,9 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
+          envform:
+            - ConfigMapRef: {name: kickstarter-config}
+            - SecretRef: {name: kickstarter-service}
           startupProbe:
             httpGet: {path: /health, port: 8000}
             failureThreshold: 30
