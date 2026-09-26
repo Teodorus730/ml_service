@@ -13,7 +13,7 @@ def test_predict_handles_missing_name(client, good_row):
     assert r.status_code == 200
 
 
-def test_batch_and_single_agree(client, good_row):
+def test_constancy(client, good_row):
     s1 = client.post("/v1/predict", json=good_row).json()["score"]
     s2 = client.post("/v1/predict", json=good_row).json()["score"]
     assert abs(s1 - s2) < 1e-12
