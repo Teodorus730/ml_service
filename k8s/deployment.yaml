@@ -19,8 +19,8 @@ spec:
           ports:
             - containerPort: 8000
           envFrom:
-            - ConfigMapRef: {name: kickstarter-config}
-            - SecretRef: {name: kickstarter-service}
+            - configMapRef: {name: kickstarter-config}
+            - secretRef: {name: kickstarter-service}
           startupProbe:
             httpGet: {path: /health, port: 8000}
             failureThreshold: 30
