@@ -4,15 +4,21 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from prometheus_client import Counter, Gauge, Histogram
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field
 
 from kickstarter import db
-from kickstarter.config import settings
+from kickstarter.model_store import load_model
+
+PREDICTIONS = Counter("kickstarter_predictions_total", "Predictions by class", ["kickstarter"])
+SCORE = Histogram("kickstarter_score", "Predicted kickstarter probability", buckets=[i / 10 for i in range(11)])
+MODEL_INFO = Gauge("kickstarter_model_info", "Model loaded by this pod", ["version"])
+LATENCY_BUCKETS = (0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1)
 
 
 class Features(BaseModel):
@@ -41,10 +47,8 @@ class Prediction(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    bundle = joblib.load(settings.model_path)
-    app.state.pipeline = bundle["pipeline"]
-    app.state.meta = bundle["metadata"]
-    app.state.version = bundle["metadata"]["model_version"]
+    app.state.pipeline, app.state.meta, app.state.version = load_model()
+    MODEL_INFO.labels(app.state.version).set(1)
 
     db.init()
     yield
@@ -52,6 +56,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="kickstarter-service", version="1.0", lifespan=lifespan)
+Instrumentator().instrument(app, latency_lowr_buckets=LATENCY_BUCKETS).expose(app)
+
 
 @app.get("/health")
 def health():
@@ -80,7 +86,9 @@ def predict(x: Features, request: Request) -> Prediction:
     request.state.score = score
 
     target = score >= app.state.meta["threshold"]
-
+    PREDICTIONS.labels(str(target).lower()).inc()
+    SCORE.observe(score)
+    
     return Prediction(
         score=score, 
         target=target, 

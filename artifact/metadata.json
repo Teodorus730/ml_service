@@ -1,7 +1,7 @@
 {
   "model_name": "kickstarter-logreg",
   "model_version": "0.1.0",
-  "trained_at": "2026-09-18T18:45:38+00:00",
+  "trained_at": "2026-10-02T12:11:22+00:00",
   "n_train": 331675,
   "features": [
     "name",

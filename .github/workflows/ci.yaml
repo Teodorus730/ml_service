@@ -2,6 +2,7 @@ name: ci
 on:
   push: {branches: [main]}
   pull_request:
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -53,9 +54,13 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
-
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, kind]
+    concurrency: {group: deploy-kind}
+    timeout-minutes: 10
     permissions: {contents: read, packages: read}
+    env:
+      KIND_CLUSTER: platform
 
     steps:
       - uses: actions/checkout@v7
@@ -66,13 +71,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: helm/kind-action@v1
-        with: {cluster_name: ci}
+      - name: kind, kubectl 
+        run: |
+          B=~/.local/bin && mkdir -p $B && echo "$B" >> "$GITHUB_PATH"
+          [ -x $B/kind ] || curl -sSLo $B/kind https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64
+          [ -x $B/kubectl ] || curl -sSLo $B/kubectl https://dl.k8s.io/v1.37.0/bin/linux/amd64/kubectl
+          chmod +x $B/kind $B/kubectl
+          $B/kind export kubeconfig --name "$KIND_CLUSTER" --internal
+          $B/kubectl get nodes
 
       - name: load image
         run: |
           docker pull "$IMAGE"
-          kind load docker-image "$IMAGE" --name ci
+          kind load docker-image "$IMAGE" --name "$KIND_CLUSTER"
 
       - name: create secrets
         env:
@@ -80,7 +91,8 @@ jobs:
         run: |
           kubectl create secret generic kickstarter-secrets \
           --from-literal=POSTGRES_PASSWORD="$DB_PASSWORD" \
-          --from-literal=DATABASE_URL="postgresql://postgres:$DB_PASSWORD@postgres:5432/kickstarter"
+          --from-literal=DATABASE_URL="postgresql://postgres:$DB_PASSWORD@postgres:5432/kickstarter" \
+          --dry-run=client -o yaml | kubectl apply -f -
       
       - name: databse
         run: |
@@ -95,25 +107,29 @@ jobs:
 
       - name: smoke
         run: |
-          kubectl port-forward svc/kickstarter-service 8080:80 &
-          sleep 5
+          U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: kickstarter.localhost"
 
-          curl --fail -s localhost:8080/health; echo
-          curl --fail -s -X POST localhost:8080/v1/predict \
+          curl --fail -s --retry 5 --retry-all-errors -H "$H" "$U/health" | tee health.json; echo
+          grep -q '"model_version":"kickstarter-v' health.json
+
+          curl --fail -s -X POST -H "$H" "$U/v1/predict" \
             -H "Content-Type: application/json" -d @good.json \
+            | tee pred.json \
             | python3 -c "import json,sys; r=json.load(sys.stdin); assert 0 <= r['score'] <= 1, r"
-          
+
           sleep 2
 
+          RID=$(jq -r .request_id pred.json)
           kubectl exec deploy/postgres -- psql -U postgres -d kickstarter \
-            -tc "SELECT count(*) FROM predictions" | grep -q 1
+              -tAc "SELECT count(*) FROM predictions WHERE request_id = '$RID'" | grep -qx 1
       
       - name: diagnostics
         if: failure()
 
         run: |
-          kubectl get pods -o wide
+          kubectl get pods -A -o wide
+          kubectl get ingress -A
           kubectl describe deploy/kickstarter-service | tail -20
-          kubectl logs deploy/kickstarter-service --tail=30 || true
+          kubectl logs deploy/kickstarter-service --tail=50 || true
 
       
