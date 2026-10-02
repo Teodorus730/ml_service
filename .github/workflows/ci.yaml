@@ -103,7 +103,7 @@ jobs:
         run: |
           kubectl apply -f k8s/
           kubectl set image deploy/kickstarter-service api="$IMAGE"
-          kubectl rollout status deploy/kickstarter-service --timeout=120s
+          kubectl rollout status deploy/kickstarter-service --timeout=300s
 
       - name: smoke
         run: |
