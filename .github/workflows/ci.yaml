@@ -115,15 +115,6 @@ jobs:
           HTTP_CODE=$(curl -s -o pred.json -w "%{http_code}" -X POST -H "$H" "$U/v1/predict" \
             -H "Content-Type: application/json" -d @good.json)
           
-          echo "--- HTTP_CODE: $HTTP_CODE ---"
-          echo "--- SERVER RESPONSE (pred.json) ---"
-          cat pred.json
-          
-          if [ ! -s pred.json ]; then
-            echo "ERROR: Server returned empty response or curl failed."
-            exit 1
-          fi
-          
           python3 -c "import json,sys; r=json.load(sys.stdin); assert 0 <= r['score'] <= 1, r" < pred.json
 
           sleep 2
