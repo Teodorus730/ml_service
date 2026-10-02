@@ -109,11 +109,11 @@ jobs:
         run: |
           U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: kickstarter.localhost"
 
-          curl --fail -s --retry 5 --retry-all-errors -H "$H" "$U/health" | tee health.json; echo
-          grep -q '"model_version":"kickstarter-v' health.json
-          
-          HTTP_CODE=$(curl -s -o pred.json -w "%{http_code}" -X POST -H "$H" "$U/v1/predict" \
-            -H "Content-Type: application/json" -d @good.json)
+          curl --fail -s --retry 5 --retry-all-errors -H "$H" $U/health | tee health.json; echo
+          grep -q '"model_version":"churn-v' health.json
+
+          curl --fail -s -X POST -H "$H" $U/v1/predict \
+            -H "Content-Type: application/json" -d @good.json | tee pred.json; echo
           
           python3 -c "import json,sys; r=json.load(sys.stdin); assert 0 <= r['score'] <= 1, r" < pred.json
 
