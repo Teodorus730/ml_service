@@ -109,15 +109,18 @@ jobs:
         run: |
           U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: kickstarter.localhost"
 
+                - name: smoke
+        run: |
+          U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: kickstarter.localhost"
+
           curl --fail -s --retry 5 --retry-all-errors -H "$H" "$U/health" | tee health.json; echo
           grep -q '"model_version":"kickstarter-v' health.json
-
-          echo "--- SENDING PREDICT REQUEST ---"
-          curl -s -w "\n--- HTTP_CODE: %{http_code} ---\n" -X POST -H "$H" "$U/v1/predict" \
-            -H "Content-Type: application/json" -d @good.json \
-            | tee pred.json
-            
-          echo "--- (pred.json) ---"
+          
+          HTTP_CODE=$(curl -s -o pred.json -w "%{http_code}" -X POST -H "$H" "$U/v1/predict" \
+            -H "Content-Type: application/json" -d @good.json)
+          
+          echo "--- HTTP_CODE: $HTTP_CODE ---"
+          echo "--- SERVER RESPONSE (pred.json) ---"
           cat pred.json
           
           if [ ! -s pred.json ]; then
@@ -126,6 +129,12 @@ jobs:
           fi
           
           python3 -c "import json,sys; r=json.load(sys.stdin); assert 0 <= r['score'] <= 1, r" < pred.json
+
+          sleep 2
+
+          RID=$(jq -r .request_id pred.json)
+          kubectl exec deploy/postgres -- psql -U postgres -d kickstarter \
+              -tAc "SELECT count(*) FROM predictions WHERE request_id = '$RID'" | grep -qx 1
 
       - name: diagnostics
         if: failure()
