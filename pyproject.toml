@@ -1,6 +1,6 @@
 [project]
 name = "kickstarter-service"
-version = "0.1.2"
+version = "0.2.0"
 description = "ML Pro 1 sem"
 requires-python=">=3.11,<3.13"
 
@@ -12,7 +12,11 @@ dependencies = [
     "pandas==2.3.3",
     "scikit-learn==1.6.1",
     "joblib",
-    "psycopg[binary]"
+    "psycopg[binary]",
+    "mlflow-skinny>=3.16,<4",
+    "skops>=0.11",
+    "prometheus-client>=0.21",
+    "prometheus-fastapi-instrumentator>=8",
 ]
 
 [dependency-groups]
