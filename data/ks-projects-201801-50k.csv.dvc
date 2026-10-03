@@ -1,0 +1,5 @@
+outs:
+- md5: 9d82c3623d307a3c8275c18d4a58b87a
+  size: 7760801
+  hash: md5
+  path: ks-projects-201801-50k.csv
