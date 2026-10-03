@@ -194,6 +194,8 @@ def main() -> dict:
                 "scikit-learn": sklearn.__version__
             },
         }
+        import hashlib
+        mlflow.log_param("data_md5", hashlib.md5(DATA_PATH.read_bytes()).hexdigest())
         mlflow.log_params({"C": C, "model": "LogisticRegression", "seed": SEED, "data": str(DATA_PATH)})
         mlflow.log_metrics({"roc_auc": auc, "pr_auc": float(average_precision_score(y_test, proba)), "threshold": best_threshold})
         mlflow.log_dict(metadata, "metadata.json")
