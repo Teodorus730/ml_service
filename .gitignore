@@ -219,4 +219,5 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-data/
+data/ks-projects-201801.csv
+data/ks-projects-201801-50k.csv
