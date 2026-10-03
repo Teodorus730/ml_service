@@ -25,7 +25,8 @@ dev = [
     "httpx",
     "locust",
     "ruff",
-    "matplotlib"
+    "matplotlib",
+    "dvc>=3.67.1",
 ]
 
 [build-system]
