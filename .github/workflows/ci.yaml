@@ -97,13 +97,13 @@ jobs:
       - name: databse
         run: |
           kubectl apply -f k8s/postgres.yaml
-          kubectl rollout status deploy/postgres --timeout=240s
+          kubectl rollout status deploy/postgres --timeout=180s
       
       - name: service
         run: |
           kubectl apply -f k8s/
           kubectl set image deploy/kickstarter-service api="$IMAGE"
-          kubectl rollout status deploy/kickstarter-service --timeout=180s
+          kubectl rollout status deploy/kickstarter-service --timeout=240s
 
       - name: smoke
         run: |
