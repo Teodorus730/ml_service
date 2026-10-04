@@ -107,7 +107,7 @@ jobs:
 
       - name: smoke
         run: |
-          U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: kek.localhost"
+          U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: kickstarter.localhost"
 
           curl --fail -s --retry 5 --retry-all-errors -H "$H" $U/health | tee health.json; echo
           grep -q '"model_version":"kickstarter-v' health.json
