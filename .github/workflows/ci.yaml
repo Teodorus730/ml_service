@@ -97,7 +97,7 @@ jobs:
       - name: databse
         run: |
           kubectl apply -f k8s/postgres.yaml
-          kubectl rollout status deploy/postgres --timeout=180s
+          kubectl rollout status deploy/postgres --timeout=240s
       
       - name: service
         run: |
