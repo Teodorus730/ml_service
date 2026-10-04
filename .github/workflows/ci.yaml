@@ -60,7 +60,7 @@ jobs:
     timeout-minutes: 10
     permissions: {contents: read, packages: read}
     env:
-      KIND_CLUSTER: kek
+      KIND_CLUSTER: platform
 
     steps:
       - uses: actions/checkout@v7
