@@ -87,7 +87,7 @@ https://github.com/Teodorus730/ml_service/actions/runs/37073296154/job/111057750
 
 Красный: https://github.com/Teodorus730/ml_service/actions/runs/37192715808/job/111408282042
 
-Зеленый: 
+Зеленый: https://github.com/Teodorus730/ml_service/actions/runs/37193145965/job/111409547267
 
 
 # Проблемы
