@@ -27,7 +27,7 @@ DATA_PATH = Path(os.getenv("DATA_PATH", "data/ks-projects-201801.csv"))
 MODEL_NAME = os.getenv("MODEL_NAME", "kickstarter")
 EXPERIMENT = os.getenv("MLFLOW_EXPERIMENT", "kickstarter")
 C = float(os.getenv("C", "1.0"))
-MIN_GAIN = float(os.getenv("GATE_MIN_GAIN", "0.0"))
+MIN_GAIN = float(os.getenv("GATE_MIN_GAIN", "0.01"))
 SEED = 42
 SKOPS_TRUSTED = [
     "numpy.dtype", 
