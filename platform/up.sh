@@ -34,13 +34,17 @@ kubectl -n mlops create secret generic s3-credentials \
   --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f platform/s3.yaml -f platform/airflow.yaml
 
-echo "== Traefik, Prometheus и Grafana"
+echo "== Traefik, Prometheus Grafana и hpa"
+
 helm repo add traefik https://traefik.github.io/charts >/dev/null 2>&1 || true
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts >/dev/null 2>&1 || true
 helm upgrade --install traefik traefik/traefik --version 41.6.0 \
   -n traefik --create-namespace -f platform/traefik-values.yaml --wait
 helm upgrade --install monitoring prometheus-community/kube-prometheus-stack --version 91.5.2 \
   -n monitoring --create-namespace -f platform/monitoring-values.yaml
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+helm upgrade --install metrics-server metrics-server/metrics-server --version 3.14.0 \
+  -n kube-system -f platform/metrics-server-values.yaml --wait
 kubectl apply -f platform/ingress.yaml
 
 echo "== ждём поды"

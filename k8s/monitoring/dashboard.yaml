@@ -70,6 +70,6 @@ data:
           "datasource": {"type": "prometheus", "uid": "prometheus"},
           "options": {"orientation": "vertical", "displayMode": "basic", "reduceOptions": {"calcs": ["lastNotNull"]}},
           "targets": [{"refId": "A", "expr": "sum by (le) (increase(kickstarter_score_bucket[15m]))", "format": "heatmap", "legendFormat": "{{le}}"}]
-        },
+        }
       ]
     }
