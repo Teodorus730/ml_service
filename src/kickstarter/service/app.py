@@ -15,8 +15,8 @@ from pydantic import BaseModel, Field
 from kickstarter import db
 from kickstarter.model_store import load_model
 
-PREDICTIONS = Counter("kickstarter_predictions_total", "Predictions by class", ["kickstarter"])
-SCORE = Histogram("kickstarter_score", "Predicted kickstarter probability", buckets=[i / 10 for i in range(11)])
+PREDICTIONS = Counter("kickstarter_predictions_total", "Predictions by class", ["target"])
+SCORE = Histogram("kickstarter_score", "Predicted success probability", buckets=[i / 10 for i in range(11)])
 MODEL_INFO = Gauge("kickstarter_model_info", "Model loaded by this pod", ["version"])
 LATENCY_BUCKETS = (0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1)
 
