@@ -103,7 +103,7 @@ jobs:
         run: |
           kubectl apply -f k8s/
           kubectl set image deploy/kickstarter-service api="$IMAGE"
-          kubectl rollout status deploy/kickstarter-service --timeout=240s
+          kubectl rollout status deploy/kickstarter-service --timeout=300s
 
       - name: monitoring
         run: |
@@ -127,7 +127,7 @@ jobs:
           kubectl exec deploy/postgres -- psql -U postgres -d kickstarter \
               -tAc "SELECT count(*) FROM predictions WHERE request_id = '$RID'" | grep -qx 1
 
-          curl --fail -H "$H" $U/metrics | grep -q '^churn_model_info{version="churn-v'
+          curl --fail -H "$H" $U/metrics | grep -q '^kickstarter_model_info{version="kickstarter-v'
 
       - name: diagnostics
         if: failure()
