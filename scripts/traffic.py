@@ -1,6 +1,6 @@
 """Поток запросов к сервису из строк датасета, чтобы на дашборде Grafana было что смотреть.
 
-  uv run python scripts/traffic.py --url http://kickstarter.localhost --rps 5 --bad 0.05 --recs 0.3
+  uv run python scripts/traffic.py --url http://kickstarter.localhost --rps 5 --bad 0.05
 
 Через Ingress запросы делятся между подами и переживают rollout. Через port-forward нет:
 он привязан к одному поду и обрывается, когда этот под удаляют.
@@ -25,7 +25,7 @@ parser.add_argument("--bad", type=float, default=0.0)
 args = parser.parse_args()
 
 df = pd.read_csv("data/ks-projects-201801.csv").drop(columns=['ID', 'pledged', 'backers', 'state', 'usd pledged', 'usd_pledged_real'])
-rows = [{k: (None if pd.isna(v) else v) for k, v in r.items()} for r in df.to_dict("name")]
+rows = [{k: (None if pd.isna(v) else v) for k, v in r.items()} for r in df.to_dict("records")]
 
 codes: dict[int, int] = {}
 start = time.time()
