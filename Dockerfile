@@ -17,7 +17,7 @@ RUN uv sync --no-dev --frozen
 COPY artifact/ artifact/
 
 COPY .dvc/config .dvc/config
-COPY datasets/*.dvc datasets/
+COPY data/*.dvc data/
 RUN uv run --no-sync dvc config --local core.no_scm true
 
 EXPOSE 8000
