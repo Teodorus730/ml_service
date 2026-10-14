@@ -105,6 +105,10 @@ jobs:
           kubectl set image deploy/kickstarter-service api="$IMAGE"
           kubectl rollout status deploy/kickstarter-service --timeout=240s
 
+      - name: monitoring
+        run: |
+          kubectl apply -f k8s/monitoring/
+
       - name: smoke
         run: |
           U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: kickstarter.localhost"
@@ -122,6 +126,8 @@ jobs:
           RID=$(jq -r .request_id pred.json)
           kubectl exec deploy/postgres -- psql -U postgres -d kickstarter \
               -tAc "SELECT count(*) FROM predictions WHERE request_id = '$RID'" | grep -qx 1
+
+          curl --fail -H "$H" $U/metrics | grep -q '^churn_model_info{version="churn-v'
 
       - name: diagnostics
         if: failure()
