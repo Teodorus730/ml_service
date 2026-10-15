@@ -40,7 +40,7 @@ def kickstarter_retrain():
         env_vars=MLFLOW,
         env_from=[k8s.V1EnvFromSource(secret_ref=k8s.V1SecretEnvSource(name="s3-credentials"))],
         cmds=["sh", "-c", PULL + "uv run --no-sync python -m kickstarter.data"], 
-        **COMMON,
+        **COMMON
     )
     train = KubernetesPodOperator(
         task_id="train",
@@ -49,6 +49,7 @@ def kickstarter_retrain():
         env_from=[k8s.V1EnvFromSource(secret_ref=k8s.V1SecretEnvSource(name="s3-credentials"))],
         cmds=["sh", "-c", PULL + "uv run --no-sync python -m kickstarter.train"],
         do_xcom_push=True,
+        **COMMON
     )
     
     @task.short_circuit
