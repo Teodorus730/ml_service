@@ -109,6 +109,12 @@ jobs:
         run: |
           kubectl apply -f k8s/monitoring/
 
+      - name: dags
+        run: |
+          kubectl -n mlops create configmap airflow-dags --from-file=dags/ \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n mlops exec deploy/airflow -- airflow variables set kickstarter_image "$IMAGE"
+
       - name: smoke
         run: |
           U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: kickstarter.localhost"
@@ -137,5 +143,6 @@ jobs:
           kubectl get ingress -A
           kubectl describe deploy/kickstarter-service | tail -20
           kubectl logs deploy/kickstarter-service --tail=50 || true
+          kubectl -n mlops get secrets
 
       
