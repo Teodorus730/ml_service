@@ -1,6 +1,6 @@
 [project]
 name = "kickstarter-service"
-version = "0.2.1"
+version = "0.3.0"
 description = "ML Pro 1 sem"
 requires-python=">=3.11,<3.13"
 
@@ -22,6 +22,7 @@ dependencies = [
     "scipy>=1.17.1",
     "pyarrow>=26.0.0",
     "dvc[s3]>=3.67.1",
+    "matplotlib",
 ]
 
 [dependency-groups]
@@ -30,7 +31,6 @@ dev = [
     "httpx",
     "locust",
     "ruff",
-    "matplotlib",
     "dvc>=3.67.1",
 ]
 

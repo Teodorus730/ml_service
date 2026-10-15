@@ -1392,13 +1392,14 @@ wheels = [
 
 [[package]]
 name = "kickstarter-service"
-version = "0.2.1"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "dvc", extra = ["s3"] },
     { name = "fastapi" },
     { name = "implicit" },
     { name = "joblib" },
+    { name = "matplotlib" },
     { name = "mlflow-skinny" },
     { name = "pandas" },
     { name = "pandera" },
@@ -1420,7 +1421,6 @@ dev = [
     { name = "dvc" },
     { name = "httpx" },
     { name = "locust" },
-    { name = "matplotlib" },
     { name = "pytest" },
     { name = "ruff" },
 ]
@@ -1431,6 +1431,7 @@ requires-dist = [
     { name = "fastapi" },
     { name = "implicit", specifier = ">=0.7.3" },
     { name = "joblib" },
+    { name = "matplotlib" },
     { name = "mlflow-skinny", specifier = ">=3.16,<4" },
     { name = "pandas", specifier = "==2.3.3" },
     { name = "pandera", specifier = ">=0.34.1" },
@@ -1451,7 +1452,6 @@ dev = [
     { name = "dvc", specifier = ">=3.67.1" },
     { name = "httpx" },
     { name = "locust" },
-    { name = "matplotlib" },
     { name = "pytest" },
     { name = "ruff" },
 ]
