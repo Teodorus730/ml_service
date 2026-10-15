@@ -2,14 +2,13 @@ import pandas as pd
 import pandera.pandas as pa
 import pytest
 
-from kickstarter import db
-from kickstarter.data import EXPORT, ROWS, clean
+from kickstarter.data import ROWS, clean
 
 
 @pytest.fixture()
 def raw():
     return pd.DataFrame({
-    "name": ["Solar-Powered Smart Backpack", "Retro Pixel Art Bluetooth Speaker", None, "Minimalist Leather Wallet with RFID", "Indie Cyberpunk RPG Board Game"],
+    "name": ["Solar-Powered Smart Backpack", "Retro Pixel Art Bluetooth Speaker", None, "Leather Wallet with RFID", "Indie Cyberpunk Board Game"],
     "category": ["Product Design", "Gadgets", "Hardware", "Accessories", "Tabletop Games"],
     "main_category": ["Design", "Technology", "Technology", "Design", "Games"],
     "currency": ["USD", "EUR", "GBP", "USD", "CAD"],

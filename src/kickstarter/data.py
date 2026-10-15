@@ -46,7 +46,8 @@ EXPORT = pa.DataFrameSchema(
     ROWS.columns,
     checks=[
         pa.Check(lambda df: len(df) >= 10000, error="меньше 10 тысяч строк: выгрузка неполная"),
-        pa.Check(lambda df: len(df[df['state'].isin(['successful', 'failed'])]) >= 1000, error="меньше 1к строк пойдет на обучение, нужно больше данных"),
+        pa.Check(lambda df: len(df[df['state'].isin(['successful', 'failed'])]) >= 1000, 
+                 error="меньше 1к строк пойдет на обучение, нужно больше данных"),
         pa.Check(lambda df: df["name"].nunique() >= 1_000, error="меньше 1000 проектов"),
         pa.Check(lambda df: 0.5 <= df["usd_goal_real"].median() <= 6000.0, error="медиана выше 6к, мб косяки с конвертацией валюты"),
     ],
